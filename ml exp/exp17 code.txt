@@ -1,0 +1,52 @@
+import numpy as np
+import matplotlib.pyplot as plt
+
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, ConfusionMatrixDisplay
+
+# Generate mobile dataset
+np.random.seed(42)
+
+X = np.random.randint(1, 100, (200, 4))
+
+# Features: RAM, Battery, Camera, Storage
+y = np.digitize(
+    X[:, 0] * 3 + X[:, 1] + X[:, 2] + X[:, 3],
+    bins=[200, 300, 400]
+)
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+# Train model
+model = RandomForestClassifier(random_state=42)
+model.fit(X_train, y_train)
+
+# Prediction
+y_pred = model.predict(X_test)
+
+print("Mobile Price Prediction")
+print("Accuracy:", accuracy_score(y_test, y_pred) * 100, "%")
+
+# Confusion matrix
+ConfusionMatrixDisplay.from_predictions(
+    y_test, y_pred, cmap="Blues"
+)
+plt.title("Mobile Price Confusion Matrix")
+plt.show()
+
+# Price category graph
+plt.figure(figsize=(7, 4))
+plt.hist(y_pred, bins=np.arange(-0.5, 4.5, 1), rwidth=0.7)
+plt.xlabel("Price Category")
+plt.ylabel("Number of Mobiles")
+plt.title("Mobile Price Classification")
+plt.show()
+
+# New mobile prediction
+sample = [[8, 80, 48, 64]]
+print("Predicted Price Category:",
+      model.predict(sample)[0])

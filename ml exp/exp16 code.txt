@@ -1,0 +1,59 @@
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+
+# Load dataset
+data = load_iris()
+X = data.data
+y = data.target
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# Classification algorithms
+models = {
+    "Decision Tree": DecisionTreeClassifier(random_state=42),
+    "KNN": make_pipeline(StandardScaler(),
+                         KNeighborsClassifier(n_neighbors=5)),
+    "Naive Bayes": GaussianNB(),
+    "Logistic Regression": make_pipeline(
+        StandardScaler(), LogisticRegression(max_iter=1000)
+    ),
+    "SVM": make_pipeline(StandardScaler(), SVC())
+}
+
+# Calculate accuracy
+results = {}
+
+for name, model in models.items():
+    model.fit(X_train, y_train)
+    prediction = model.predict(X_test)
+    accuracy = accuracy_score(y_test, prediction) * 100
+    results[name] = accuracy
+    print(name, "Accuracy:", round(accuracy, 2), "%")
+
+# Comparison graph
+plt.figure(figsize=(9, 5))
+plt.bar(results.keys(), results.values())
+plt.xlabel("Algorithms")
+plt.ylabel("Accuracy (%)")
+plt.title("Classification Algorithm Comparison")
+plt.xticks(rotation=25)
+plt.ylim(0, 110)
+plt.grid(axis="y")
+plt.show()
+
+print("\nBest Algorithm:",
+      max(results, key=results.get))

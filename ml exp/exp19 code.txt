@@ -1,0 +1,70 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.preprocessing import LabelEncoder
+from sklearn.naive_bayes import CategoricalNB
+from sklearn.metrics import accuracy_score, ConfusionMatrixDisplay
+from sklearn.model_selection import train_test_split
+
+# Create bank loan dataset
+data = {
+    "Income": ["High", "Low", "Medium", "High", "Low",
+               "Medium", "High", "Low", "Medium", "High",
+               "Low", "Medium"],
+    "Credit": ["Good", "Poor", "Good", "Good", "Poor",
+               "Good", "Poor", "Good", "Poor", "Good",
+               "Poor", "Good"],
+    "Employment": ["Yes", "No", "Yes", "Yes", "No",
+                   "Yes", "No", "Yes", "No", "Yes",
+                   "No", "Yes"],
+    "Loan": ["Yes", "No", "Yes", "Yes", "No",
+             "Yes", "No", "Yes", "No", "Yes",
+             "No", "Yes"]
+}
+
+df = pd.DataFrame(data)
+
+print("Bank Loan Dataset")
+display(df)
+
+# Encode categorical data
+encoders = {}
+
+for col in df.columns:
+    encoders[col] = LabelEncoder()
+    df[col] = encoders[col].fit_transform(df[col])
+
+X = df.drop("Loan", axis=1)
+y = df["Loan"]
+
+# Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42, stratify=y
+)
+
+# Train Naive Bayes model
+model = CategoricalNB()
+model.fit(X_train, y_train)
+
+# Prediction
+y_pred = model.predict(X_test)
+
+print("Bank Loan Prediction")
+print("Accuracy:", accuracy_score(y_test, y_pred) * 100, "%")
+
+# Confusion matrix
+ConfusionMatrixDisplay.from_predictions(
+    y_test, y_pred, cmap="Blues"
+)
+plt.title("Bank Loan Confusion Matrix")
+plt.show()
+
+# Graph
+plt.figure(figsize=(6, 4))
+plt.bar(
+    ["Rejected", "Approved"],
+    [(y_pred == 0).sum(), (y_pred == 1).sum()]
+)
+plt.ylabel("Number of Applications")
+plt.title("Bank Loan Prediction Results")
+plt.show()
